@@ -1,0 +1,41 @@
+﻿@functions {
+    // IMPORT
+    public static string doImport() {
+        
+        // Store all imported data in Array.
+        Array userData = null;
+        var dataFile = Server.MapPath("~/App_Data/UploadedFiles/data.txt");
+
+        if (File.Exists(dataFile)) {
+            userData = File.ReadAllLines(dataFile);
+            if (userData == null) {
+                // Empty file.
+                return "The file is empty.";
+            } else {
+                // Do import here.
+                char[] delimiterChar = {','};
+                var db = Database.Open("Syncr");
+                var insertQuery = "INSERT INTO People (FirstName, LastName, Address, City, State, Zip, Email, ggdbID, Active) VALUES (@0, @1, @2, @3, @4, @5, @6, @7, @8)";
+                var count = 0;
+                string[] details = new string[8];
+
+                foreach (string dataLine in userData) {
+                    foreach (string dataItem in dataLine.Split(delimiterChar)) {
+                        //add an item to the Detail array
+                        details[count] = dataItem;
+                    }
+                    // Now execute Insert for each Line using Deatil array values
+                    db.Execute(insertQuery, details[0], details[1], details[2], details[3], details[3], details[4], details[5], details[6], details[7], details[8]);
+                    // iterate!
+                    count++;
+                }
+                // No news is good news :)
+                return "";
+            }
+        }
+        else {
+            // File does not exist.
+            return "The File does not exist.";
+        }
+    }
+}

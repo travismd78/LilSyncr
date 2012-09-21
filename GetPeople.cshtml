@@ -1,0 +1,6 @@
+﻿@{
+    var db = Database.Open("Syncr");
+    var selectedData = db.Query("SELECT * FROM People ORDER BY FirstName, LastName");   
+    var myJson = Json.Encode(selectedData);
+    Response.Write(myJson);
+}

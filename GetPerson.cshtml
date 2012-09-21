@@ -1,0 +1,7 @@
+﻿@{
+    var db = Database.Open("Syncr");
+    var id = UrlData[0] ?? "Empty";
+    var sql = @"SELECT * FROM People WHERE ID = @0";
+    var selectedData = db.QuerySingle(sql, id);
+    Json.Write(selectedData, Response.Output);
+}

@@ -1,0 +1,50 @@
+﻿@{
+    var result="";
+    Array userData = null;
+    char[] delimeterChar = {','};
+    var dataFile = Server.MapPath("App_Data/UploadedFiles/data.txt");
+    
+    if (File.Exists(dataFile)) {
+        userData = File.ReadAllLines(dataFile);
+        if (userData == null) {
+            // Empty file
+            result = "The file is empty.";
+        }  
+    } else {
+        // File does not exist.
+        result = "The file does not exist.";
+    }
+
+    var db = Database.Open("Syncr");
+    string sqlCommand = "";
+    int fieldCounter = 0;
+    string[] fieldArray = new string[10];
+     
+    if (result == "") {
+        foreach (string dataLine in userData) {
+            // RECORD LEVEL
+            fieldCounter = 0;
+            foreach (string dataItem in dataLine.Split(delimiterChar)) {
+                    // FIELD LEVEL
+                    fieldArray[fieldCounter] = dataItem;
+                    fieldCounter++;
+                } // end foreach dataItem
+                
+                // try to lookup Family record (ggID) with this FamilyID. If result is null then it's new
+                // ALT IDEA - pull the highest ggdbID via QuerySingle ORDER BY ggdbID Desc; if this ggdbID is higher than that, it's new and should be INSERT; probably faster; watchout for 1st upload
+                sqlCommand = "SELECT ggdbID FROM People WHERE ggdbID=@0";
+                var matchingRecord = db.QuerySingle(sqlCommand,fieldArray[0]);
+                if (matchingRecord != null) {
+                    sqlCommand = "UPDATE People SET ggdbID=@0, FirstName=@1, LastName=@2, Email=@3, Phone=@4, Address=@5, City=@6, State=@7, ZipCode=@8, Active=@9, K1FirstName=@10, K1LastName=@11, K1Birthdate=@12, K1School=@13, K1Grade=@14, K1Years=@15, K1Active=@16, K1Method=@17, K1Tag=@18, K2FirstName=@19, K2LastName=@20, K2Birthdate=@21, K2School=@22, K2Grade=@23, K2Years=@24, K2Active=@25, K2Method=@26, K2Tag=@27, K3FirstName=@28, K3LastName=@29, K3Birthdate=@30, K3School=@31, K3Grade=@32, K3Years=@33, K3Active=@34, K3Method=@35, K3Tag=@36, SummerSchedule=@37 WHERE ggdbID=@0";
+                } 
+                else {
+                    sqlCommand = "INSERT INTO People (ggdbID, FirstName, LastName, Email, Phone, Address, City, State, ZipCode, Active, K1FirstName, K1LastName, K1Birthdate, K1School, K1Grade, K1Years, K1Active, K1Method, K1Tag, K2FirstName, K2LastName, K2Birthdate, K2School, K2Grade, K2Years, K2Active, K2Method, K2Tag, K3FirstName, K3LastName, K3Birthdate, K3School, K3Grade, K3Years, K3Active, K3Method, K3Tag, SummerSchedule) VALUES(@0, @1, @2, @3, @4, @5, @6, @7, @8, @9, @10, @11, @12, @13, @14, @15, @16, @17, @18, @19, @20, @21, @22, @23, @24, @25, @26, @27, @28, @29, @30, @31, @32, @33, @34, @35, @36, @37)";
+                }
+                db.Execute(sqlCommand, fieldArray[0], fieldArray[1], fieldArray[2], fieldArray[3], fieldArray[4], fieldArray[5], fieldArray[6], fieldArray[7], fieldArray[8], fieldArray[9], fieldArray[10], fieldArray[11], fieldArray[12], fieldArray[13], fieldArray[14], fieldArray[15], fieldArray[16], fieldArray[17], fieldArray[18], fieldArray[19], fieldArray[20], fieldArray[21], fieldArray[22], fieldArray[23], fieldArray[24], fieldArray[25], fieldArray[26], fieldArray[27], fieldArray[28], fieldArray[29], fieldArray[30], fieldArray[31], fieldArray[32], fieldArray[33], fieldArray[34], fieldArray[35], fieldArray[36], fieldArray[37]);
+            } // end foreach dataLine
+        } // end if
+    result="ok";
+        
+    // delete old file
+        // File.Delete (dataFile);
+}
